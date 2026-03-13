@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SajiloKhata — Digital Business Management & Accounting System" />
+  <title>SajiloKhata</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     AUTH PAGE
+════════════════════════════════════════════════════════════════ -->
+<div id="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">📒</div>
+      <div>
+        <h1>SajiloKhata</h1>
+        <span>Business Management System</span>
+      </div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label" for="login-username">Username</label>
+        <input id="login-username" class="form-input" type="text"
+               placeholder="Enter your username" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="login-password">Password</label>
+        <input id="login-password" class="form-input" type="password"
+               placeholder="Enter your password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" id="login-btn" class="btn btn-primary btn-full">
+        <span>Login</span>
+      </button>
+    </form>
+
+    <!-- Signup Form -->
+    <form id="signup-form" style="display:none" onsubmit="handleSignup(event)">
+      <div class="form-group">
+        <label class="form-label" for="signup-username">Username</label>
+        <input id="signup-username" class="form-input" type="text"
+               placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="50" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-password">Password</label>
+        <input id="signup-password" class="form-input" type="password"
+               placeholder="Min 8 characters" required autocomplete="new-password" minlength="8" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="signup-confirm">Confirm Password</label>
+        <input id="signup-confirm" class="form-input" type="password"
+               placeholder="Repeat your password" required autocomplete="new-password" minlength="8" />
+      </div>
+      <button type="submit" id="signup-btn" class="btn btn-success btn-full">
+        <span>Create Account</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     APP SHELL (hidden until logged in)
+════════════════════════════════════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- ── Sidebar ────────────────────────────────────────────────── -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo-icon">📒</div>
+      <div class="sidebar-logo-text">
+        <h2>SajiloKhata</h2>
+        <p>Business Manager</p>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Overview</span>
+      <div class="nav-item active" data-section="dashboard" onclick="navigateTo('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+
+      <span class="nav-section-label">Inventory</span>
+      <div class="nav-item" data-section="products" onclick="navigateTo('products', this)">
+        <span class="nav-icon">📦</span> Products
+      </div>
+
+      <span class="nav-section-label">Parties</span>
+      <div class="nav-item" data-section="customers" onclick="navigateTo('customers', this)">
+        <span class="nav-icon">👤</span> Customers
+      </div>
+      <div class="nav-item" data-section="suppliers" onclick="navigateTo('suppliers', this)">
+        <span class="nav-icon">🏭</span> Suppliers
+      </div>
+
+      <span class="nav-section-label">Transactions</span>
+      <div class="nav-item" data-section="new-transaction" onclick="navigateTo('new-transaction', this)">
+        <span class="nav-icon">🔄</span> New Transaction
+      </div>
+      <div class="nav-item" data-section="transactions" onclick="navigateTo('transactions', this)">
+        <span class="nav-icon">📋</span> Transaction History
+      </div>
+      <div class="nav-item" data-section="expenses" onclick="navigateTo('expenses', this)">
+        <span class="nav-icon">💸</span> Expenses
+      </div>
+      <div class="nav-item" data-section="baki" onclick="navigateTo('baki', this)">
+        <span class="nav-icon">🏦</span> Baki Ledger
+        <span class="nav-badge" id="baki-badge" style="display:none">!</span>
+      </div>
+
+      <span class="nav-section-label">Analytics</span>
+      <div class="nav-item" data-section="reports" onclick="navigateTo('reports', this)">
+        <span class="nav-icon">📈</span> Reports
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="user-display-name">Loading...</div>
+          <div class="user-role">Administrator</div>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-full btn-sm" onclick="handleLogout()">🚪 Logout</button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ──────────────────────────────────────────── -->
+  <main class="main-content">
+    <header class="topbar">
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="topbar-title">Dashboard</span>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="navigateTo('new-transaction', document.querySelector('[data-section=new-transaction]'))">
+          + New Transaction
+        </button>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ══ DASHBOARD ═══════════════════════════════════════════ -->
+      <section id="section-dashboard" class="section active">
+        <div class="page-header">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Real-time business overview</p>
+          </div>
+        </div>
+        <div class="stats-grid" id="dashboard-stats">
+          <div class="stat-card" style="--stat-color:var(--clr-success);--stat-rgb:16,185,129">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" id="stat-revenue">—</div>
+            <div class="stat-label">Total Revenue (This Month)</div>
+          </div>
+          <div class="stat-card" style="--stat-color:var(--clr-primary);--stat-rgb:79,70,229">
+            <div class="stat-icon">📦</div>
+            <div class="stat-value" id="stat-products">—</div>
+            <div class="stat-label">Total Products</div>
+          </div>
+          <div class="stat-card" style="--stat-color:var(--clr-accent);--stat-rgb:6,182,212">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="stat-net-profit">—</div>
+            <div class="stat-label">Net Profit (This Month)</div>
+          </div>
+          <div class="stat-card" style="--stat-color:var(--clr-danger);--stat-rgb:239,68,68">
+            <div class="stat-icon">🏦</div>
+            <div class="stat-value" id="stat-baki">—</div>
+            <div class="stat-label">Outstanding Baki</div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recent Transactions</div>
+                <div class="card-subtitle">Last 10 transactions</div>
+              </div>
+            </div>
+            <div class="table-wrapper">
+              <table id="dashboard-tx-table">
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Type</th><th>Payment</th><th>Amount</th><th>Date</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboard-tx-body">
+                  <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">📋</div><p>No transactions yet</p></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Low Stock Alert</div>
+            </div>
+            <div id="low-stock-list">
+              <div class="empty-state"><div class="empty-icon">📦</div><p>No low stock items</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ PRODUCTS ═════════════════════════════════════════════ -->
+      <section id="section-products" class="section">
+        <div class="page-header">
+          <div><h2>Products</h2><p>Manage your inventory items</p></div>
+          <button class="btn btn-primary" onclick="openModal('product-modal')">+ Add Product</button>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Name</th><th>Description</th><th>Unit Price</th><th>Stock</th><th>Last Updated</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="products-tbody">
+                <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📦</div><p>No products yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ CUSTOMERS ════════════════════════════════════════════ -->
+      <section id="section-customers" class="section">
+        <div class="page-header">
+          <div><h2>Customers</h2><p>Manage customer data</p></div>
+          <button class="btn btn-primary" onclick="openModal('customer-modal')">+ Add Customer</button>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Name</th><th>Contact</th><th>Address</th><th>Joined</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="customers-tbody">
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">👤</div><p>No customers yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SUPPLIERS ════════════════════════════════════════════ -->
+      <section id="section-suppliers" class="section">
+        <div class="page-header">
+          <div><h2>Suppliers</h2><p>Manage supplier data</p></div>
+          <button class="btn btn-primary" onclick="openModal('supplier-modal')">+ Add Supplier</button>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Name</th><th>Contact</th><th>Address</th><th>Joined</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="suppliers-tbody">
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🏭</div><p>No suppliers yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ NEW TRANSACTION ══════════════════════════════════════ -->
+      <section id="section-new-transaction" class="section">
+        <div class="page-header">
+          <div><h2>New Transaction</h2><p>Record a sale or purchase</p></div>
+        </div>
+
+        <form id="transaction-form" onsubmit="submitTransaction(event)">
+          <div class="grid-2" style="margin-bottom:1.5rem">
+            <div class="card">
+              <div class="card-header"><div class="card-title">Transaction Details</div></div>
+              <div class="form-group">
+                <label class="form-label">Transaction Type</label>
+                <select id="tx-type" class="form-select" onchange="onTxTypeChange()" required>
+                  <option value="">Select type...</option>
+                  <option value="Sale">Sale (Reduce Stock)</option>
+                  <option value="Purchase">Purchase (Add Stock)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Payment Type</label>
+                <select id="tx-payment" class="form-select" onchange="onPaymentTypeChange()" required>
+                  <option value="">Select payment...</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Baki">Baki (Credit)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" id="ref-label">Customer / Supplier</label>
+                <select id="tx-reference" class="form-select" required>
+                  <option value="">Select type first...</option>
+                </select>
+              </div>
+              <div class="form-group" id="due-date-group" style="display:none">
+                <label class="form-label">Due Date</label>
+                <input id="tx-due-date" type="date" class="form-input" />
+              </div>
+            </div>
+
+            <!-- Basket -->
+            <div class="card">
+              <div class="card-header"><div class="card-title">🛒 Basket</div></div>
+              <div class="form-group">
+                <label class="form-label">Add Product</label>
+                <select id="basket-product" class="form-select">
+                  <option value="">Select product...</option>
+                </select>
+              </div>
+              <div class="grid-2">
+                <div class="form-group">
+                  <label class="form-label">Quantity</label>
+                  <input id="basket-qty" class="form-input" type="number" min="1" value="1" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Unit Price</label>
+                  <input id="basket-price" class="form-input" type="number" min="0" step="0.01" placeholder="Auto" />
+                </div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-full btn-sm" onclick="addToBasket()">+ Add to Basket</button>
+              <div id="basket-items" style="margin-top:1rem"></div>
+              <div class="basket-total" id="basket-total" style="display:none"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:1rem;justify-content:flex-end">
+            <button type="button" class="btn btn-ghost" onclick="clearBasket()">Clear Basket</button>
+            <button type="submit" id="tx-submit-btn" class="btn btn-success">
+              ✅ Submit Transaction
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- ══ TRANSACTION HISTORY ══════════════════════════════════ -->
+      <section id="section-transactions" class="section">
+        <div class="page-header">
+          <div><h2>Transaction History</h2><p>All recorded transactions</p></div>
+        </div>
+        <div class="report-filter">
+          <label>Type:</label>
+          <select id="filter-tx-type" class="form-select" style="width:140px" onchange="loadTransactions()">
+            <option value="">All</option>
+            <option value="Sale">Sale</option>
+            <option value="Purchase">Purchase</option>
+          </select>
+          <label>Payment:</label>
+          <select id="filter-tx-payment" class="form-select" style="width:140px" onchange="loadTransactions()">
+            <option value="">All</option>
+            <option value="Cash">Cash</option>
+            <option value="Baki">Baki</option>
+          </select>
+          <label>From:</label>
+          <input id="filter-tx-from" type="date" class="form-input" style="width:160px" onchange="loadTransactions()" />
+          <label>To:</label>
+          <input id="filter-tx-to" type="date" class="form-input" style="width:160px" onchange="loadTransactions()" />
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Type</th><th>Payment</th><th>Amount</th><th>Ref ID</th><th>Date</th></tr>
+              </thead>
+              <tbody id="transactions-tbody">
+                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><p>No transactions</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ EXPENSES ══════════════════════════════════════════════ -->
+      <section id="section-expenses" class="section">
+        <div class="page-header">
+          <div><h2>Expenses</h2><p>Record and track business expenses</p></div>
+          <button class="btn btn-primary" onclick="openModal('expense-modal')">+ Add Expense</button>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead><tr><th>ID</th><th>Description</th><th>Amount</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="expenses-tbody">
+                <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">💸</div><p>No expenses yet</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ BAKI LEDGER ═══════════════════════════════════════════ -->
+      <section id="section-baki" class="section">
+        <div class="page-header">
+          <div><h2>Baki Ledger</h2><p>Manage outstanding credit/debit balances</p></div>
+        </div>
+        <div class="report-filter">
+          <label>Type:</label>
+          <select id="filter-baki-type" class="form-select" style="width:180px" onchange="loadBaki()">
+            <option value="">All</option>
+            <option value="Customer_Debit">Customer Debit</option>
+            <option value="Supplier_Credit">Supplier Credit</option>
+          </select>
+          <label>Status:</label>
+          <select id="filter-baki-status" class="form-select" style="width:160px" onchange="loadBaki()">
+            <option value="">All</option>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Partially Paid">Partially Paid</option>
+            <option value="Paid">Paid</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>ID</th><th>Type</th><th>Entity</th><th>Amount</th><th>Status</th><th>Due Date</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="baki-tbody">
+                <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🏦</div><p>No baki records</p></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ REPORTS ═══════════════════════════════════════════════ -->
+      <section id="section-reports" class="section">
+        <div class="page-header">
+          <div><h2>Reports</h2><p>Real-time business analytics</p></div>
+        </div>
+
+        <div class="report-filter">
+          <label>From:</label>
+          <input id="report-from" type="date" class="form-input" style="width:160px" />
+          <label>To:</label>
+          <input id="report-to" type="date" class="form-input" style="width:160px" />
+          <button class="btn btn-primary btn-sm" onclick="loadAllReports()">Generate Reports</button>
+        </div>
+
+        <!-- P&L -->
+        <div class="grid-2" style="margin-bottom:1.5rem">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📊 Profit & Loss</div></div>
+            <div id="pl-content">
+              <div class="empty-state"><p>Click "Generate Reports" to load</p></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">💧 Cash Flow</div></div>
+            <div id="cashflow-content">
+              <div class="empty-state"><p>Click "Generate Reports" to load</p></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card-header"><div class="card-title">📦 Inventory Report</div></div>
+          <div id="inventory-report-content">
+            <div class="empty-state"><p>Click "Generate Reports" to load</p></div>
+          </div>
+        </div>
+
+        <!-- Ledger -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">📒 Full Ledger</div></div>
+          <div class="table-wrapper" id="ledger-content">
+            <div class="empty-state"><p>Click "Generate Reports" to load</p></div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /page-content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODALS
+════════════════════════════════════════════════════════════════ -->
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="product-modal-title">Add Product</span>
+      <button class="modal-close" onclick="closeModal('product-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="product-edit-id" />
+      <div class="form-group">
+        <label class="form-label">Product Name *</label>
+        <input id="product-name" class="form-input" type="text" placeholder="e.g. Basmati Rice 5kg" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea id="product-desc" class="form-textarea" placeholder="Optional description"></textarea>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Unit Price *</label>
+          <input id="product-price" class="form-input" type="number" step="0.01" min="0" placeholder="0.00" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock Quantity</label>
+          <input id="product-stock" class="form-input" type="number" min="0" value="0" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('product-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- Customer Modal -->
+<div class="modal-overlay" id="customer-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="customer-modal-title">Add Customer</span>
+      <button class="modal-close" onclick="closeModal('customer-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="customer-edit-id" />
+      <div class="form-group">
+        <label class="form-label">Customer Name *</label>
+        <input id="customer-name" class="form-input" type="text" placeholder="Full name" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Number</label>
+        <input id="customer-contact" class="form-input" type="tel" placeholder="e.g. 9800000000" maxlength="15" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input id="customer-address" class="form-input" type="text" placeholder="City or full address" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('customer-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Supplier Modal -->
+<div class="modal-overlay" id="supplier-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="supplier-modal-title">Add Supplier</span>
+      <button class="modal-close" onclick="closeModal('supplier-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="supplier-edit-id" />
+      <div class="form-group">
+        <label class="form-label">Supplier Name *</label>
+        <input id="supplier-name" class="form-input" type="text" placeholder="Company or person name" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Number</label>
+        <input id="supplier-contact" class="form-input" type="tel" placeholder="e.g. 9800000000" maxlength="15" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Address</label>
+        <input id="supplier-address" class="form-input" type="text" placeholder="City or full address" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('supplier-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSupplier()">Save Supplier</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expense-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add Expense</span>
+      <button class="modal-close" onclick="closeModal('expense-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Description *</label>
+        <input id="expense-desc" class="form-input" type="text" placeholder="e.g. Office rent, Electricity bill" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Amount (Rs) *</label>
+        <input id="expense-amount" class="form-input" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('expense-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveExpense()">Record Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Baki Status Modal -->
+<div class="modal-overlay" id="baki-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Update Baki Status</span>
+      <button class="modal-close" onclick="closeModal('baki-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="baki-edit-id" />
+      <div class="form-group">
+        <label class="form-label">New Status</label>
+        <select id="baki-status-select" class="form-select">
+          <option value="Unpaid">Unpaid</option>
+          <option value="Partially Paid">Partially Paid</option>
+          <option value="Paid">Paid</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('baki-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="updateBakiStatus()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═════════════════════════════════════════════════════════════
+     JS APPLICATION
+════════════════════════════════════════════════════════════════ -->
+<script src="/js/app.js"></script>
+</body>
+</html>
