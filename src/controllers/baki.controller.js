@@ -25,7 +25,7 @@ const getAll = async (req, res, next) => {
     sql += ' ORDER BY bl.updated_at DESC';
 
     const [rows] = await db.query(sql, params);
-    res.json({ success: true, data: rows });
+    res.apiSuccess({ message: 'Baki records retrieved successfully.', data: rows });
   } catch (err) { next(err); }
 };
 
@@ -40,7 +40,7 @@ const updateStatus = async (req, res, next) => {
     if (existing.length === 0) return next(new AppError('Baki record not found.', 404));
 
     await db.query('UPDATE Baki_Ledger SET status = ? WHERE baki_id = ?', [status, req.params.id]);
-    res.json({ success: true, message: 'Baki status updated.' });
+    res.apiSuccess({ message: 'Baki status updated.' });
   } catch (err) { next(err); }
 };
 
@@ -63,8 +63,69 @@ const getSummary = async (req, res, next) => {
       GROUP BY bl.ledger_type, bl.entity_id, entity_name
       ORDER BY total_outstanding DESC
     `);
-    res.json({ success: true, data: rows });
+    res.apiSuccess({ message: 'Baki summary retrieved successfully.', data: rows });
   } catch (err) { next(err); }
 };
 
-module.exports = { getAll, updateStatus, getSummary };
+// GET /api/baki/risk-profile
+const getRiskProfile = async (req, res, next) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        bl.entity_id,
+        c.customer_name AS entity_name,
+        ROUND(SUM(bl.amount), 2) AS total_outstanding,
+        MAX(DATEDIFF(CURDATE(), COALESCE(bl.due_date, DATE(bl.updated_at)))) AS max_age_days,
+        COUNT(*) AS open_entries,
+        ROUND((SUM(bl.amount) * 0.65) + (MAX(DATEDIFF(CURDATE(), COALESCE(bl.due_date, DATE(bl.updated_at)))) * 0.35), 2) AS risk_score
+      FROM Baki_Ledger bl
+      INNER JOIN Customers c ON bl.entity_id = c.customer_id
+      WHERE bl.ledger_type = 'Customer_Debit'
+        AND bl.status <> 'Paid'
+      GROUP BY bl.entity_id, c.customer_name
+      ORDER BY risk_score DESC, total_outstanding DESC
+    `);
+    res.apiSuccess({ message: 'Baki risk profile retrieved successfully.', data: rows });
+  } catch (err) { next(err); }
+};
+
+// GET /api/baki/reminder/:id
+const getReminderLink = async (req, res, next) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        bl.baki_id,
+        bl.amount,
+        bl.status,
+        bl.due_date,
+        c.customer_name,
+        c.contact_number
+      FROM Baki_Ledger bl
+      INNER JOIN Customers c ON bl.entity_id = c.customer_id
+      WHERE bl.baki_id = ? AND bl.ledger_type = 'Customer_Debit'
+    `, [req.params.id]);
+
+    if (!rows.length) return next(new AppError('Baki reminder target not found.', 404));
+
+    const row = rows[0];
+    const cleanedPhone = String(row.contact_number || '').replace(/[^0-9]/g, '');
+    const phone = cleanedPhone.startsWith('977') ? cleanedPhone : `977${cleanedPhone}`;
+    const dueText = row.due_date ? ` due on ${row.due_date}` : '';
+    const reminderText = `Namaste ${row.customer_name}, this is a reminder for your pending baki of Rs. ${Number(row.amount).toFixed(2)}${dueText}. Please clear it at your earliest convenience. - SajiloKhata`;
+    const encodedMessage = encodeURIComponent(reminderText);
+
+    res.apiSuccess({
+      message: 'Baki reminder links generated successfully.',
+      data: {
+        baki_id: row.baki_id,
+        customer_name: row.customer_name,
+        contact_number: row.contact_number,
+        message: reminderText,
+        whatsapp_url: `https://wa.me/${phone}?text=${encodedMessage}`,
+        sms_url: `sms:${row.contact_number}?body=${encodedMessage}`,
+      },
+    });
+  } catch (err) { next(err); }
+};
+
+module.exports = { getAll, updateStatus, getSummary, getRiskProfile, getReminderLink };

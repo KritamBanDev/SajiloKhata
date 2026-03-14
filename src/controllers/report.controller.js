@@ -6,11 +6,20 @@ const db = require('../config/db');
  * Shared date-range helper — defaults to current month.
  */
 const getRange = (query) => {
-  const now   = new Date();
-  const year  = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const from  = query.from || `${year}-${month}-01 00:00:00`;
-  const to    = query.to   || `${year}-${month}-31 23:59:59`;
+  const now = new Date();
+  const year = now.getFullYear();
+  const monthIndex = now.getMonth();
+  const month = String(monthIndex + 1).padStart(2, '0');
+  const lastDay = new Date(year, monthIndex + 1, 0).getDate();
+
+  const normalize = (value, suffix) => {
+    if (!value) return null;
+    if (String(value).includes(' ')) return value;
+    return `${value} ${suffix}`;
+  };
+
+  const from = normalize(query.from, '00:00:00') || `${year}-${month}-01 00:00:00`;
+  const to = normalize(query.to, '23:59:59') || `${year}-${month}-${String(lastDay).padStart(2, '0')} 23:59:59`;
   return { from, to };
 };
 
@@ -31,7 +40,11 @@ const salesReport = async (req, res, next) => {
       GROUP BY DATE(transaction_date)
       ORDER BY sale_date ASC
     `, [from, to]);
-    res.json({ success: true, period: { from, to }, data: rows });
+    res.apiSuccess({
+      message: 'Sales report retrieved successfully.',
+      data: rows,
+      meta: { period: { from, to } },
+    });
   } catch (err) { next(err); }
 };
 
@@ -57,7 +70,11 @@ const inventoryReport = async (req, res, next) => {
         ROUND(SUM(unit_price * stock_quantity), 2) AS total_stock_value
       FROM Products
     `);
-    res.json({ success: true, summary: summary[0], data: rows });
+    res.apiSuccess({
+      message: 'Inventory report retrieved successfully.',
+      data: rows,
+      meta: { summary: summary[0] },
+    });
   } catch (err) { next(err); }
 };
 
@@ -84,19 +101,25 @@ const profitLossReport = async (req, res, next) => {
       WHERE expense_date BETWEEN ? AND ?
     `, [from, to]);
 
-    const gross_profit = sales.total_sales - purchases.total_purchases;
-    const net_profit   = gross_profit - expenses.total_expenses;
+    const gross_revenue = Number(sales.total_sales);
+    const cogs = Number(purchases.total_purchases);
+    const operating_expenses = Number(expenses.total_expenses);
+    const gross_profit = gross_revenue - cogs;
+    const net_profit   = gross_profit - operating_expenses;
 
-    res.json({
-      success: true,
-      period:  { from, to },
+    res.apiSuccess({
+      message: 'Profit and loss report retrieved successfully.',
       data: {
         total_sales:      Number(sales.total_sales),
         total_purchases:  Number(purchases.total_purchases),
         total_expenses:   Number(expenses.total_expenses),
+        gross_revenue,
+        cogs,
+        operating_expenses,
         gross_profit:     Number(gross_profit.toFixed(2)),
         net_profit:       Number(net_profit.toFixed(2)),
       },
+      meta: { period: { from, to } },
     });
   } catch (err) { next(err); }
 };
@@ -125,7 +148,14 @@ const cashFlowReport = async (req, res, next) => {
       GROUP BY DATE(expense_date)
     `, [from, to]);
 
-    res.json({ success: true, period: { from, to }, transactions: rows, expenses });
+    res.apiSuccess({
+      message: 'Cash flow report retrieved successfully.',
+      data: {
+        transactions: rows,
+        expenses,
+      },
+      meta: { period: { from, to } },
+    });
   } catch (err) { next(err); }
 };
 
@@ -159,8 +189,76 @@ const ledgerReport = async (req, res, next) => {
       ORDER BY t.transaction_date DESC
     `, [from, to]);
 
-    res.json({ success: true, period: { from, to }, data: rows });
+    res.apiSuccess({
+      message: 'Ledger report retrieved successfully.',
+      data: rows,
+      meta: { period: { from, to } },
+    });
   } catch (err) { next(err); }
 };
 
-module.exports = { salesReport, inventoryReport, profitLossReport, cashFlowReport, ledgerReport };
+// GET /api/reports/sales-trend
+const salesTrend7Day = async (_req, res, next) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        DATE(transaction_date) AS sale_date,
+        ROUND(SUM(total_amount), 2) AS total_sales
+      FROM Transactions
+      WHERE transaction_type = 'Sale'
+        AND transaction_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+      GROUP BY DATE(transaction_date)
+      ORDER BY sale_date ASC
+    `);
+    res.apiSuccess({ message: 'Sales trend report retrieved successfully.', data: rows });
+  } catch (err) { next(err); }
+};
+
+// GET /api/reports/stock-value-pie
+const stockValuePie = async (_req, res, next) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        product_name,
+        ROUND(unit_price * stock_quantity, 2) AS stock_value
+      FROM Products
+      WHERE stock_quantity > 0
+      ORDER BY stock_value DESC
+      LIMIT 10
+    `);
+    res.apiSuccess({ message: 'Stock value distribution report retrieved successfully.', data: rows });
+  } catch (err) { next(err); }
+};
+
+// GET /api/reports/customer-risk
+const customerRiskProfile = async (_req, res, next) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT
+        bl.entity_id AS customer_id,
+        c.customer_name,
+        ROUND(SUM(bl.amount), 2) AS total_outstanding,
+        MAX(DATEDIFF(CURDATE(), COALESCE(bl.due_date, DATE(bl.updated_at)))) AS max_age_days,
+        COUNT(*) AS open_entries,
+        ROUND((SUM(bl.amount) * 0.6) + (MAX(DATEDIFF(CURDATE(), COALESCE(bl.due_date, DATE(bl.updated_at)))) * 0.4), 2) AS risk_score
+      FROM Baki_Ledger bl
+      INNER JOIN Customers c ON c.customer_id = bl.entity_id
+      WHERE bl.ledger_type = 'Customer_Debit'
+        AND bl.status <> 'Paid'
+      GROUP BY bl.entity_id, c.customer_name
+      ORDER BY risk_score DESC, total_outstanding DESC
+    `);
+    res.apiSuccess({ message: 'Customer risk profile report retrieved successfully.', data: rows });
+  } catch (err) { next(err); }
+};
+
+module.exports = {
+  salesReport,
+  inventoryReport,
+  profitLossReport,
+  cashFlowReport,
+  ledgerReport,
+  salesTrend7Day,
+  stockValuePie,
+  customerRiskProfile,
+};

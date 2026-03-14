@@ -1,0 +1,161 @@
+/* SajiloKhata Content Pages v3 — Premium Design */
+
+/* ── Page Hero ── */
+.page-hero {
+  position: relative;
+  border-radius: 22px;
+  overflow: hidden;
+  padding: 2.5rem 2.5rem 2.25rem;
+  background:
+    radial-gradient(ellipse 70% 60% at 105% 0%, rgba(37,99,235,.13), transparent 60%),
+    radial-gradient(ellipse 50% 50% at -8% 110%, rgba(5,150,105,.11), transparent 55%),
+    linear-gradient(160deg, #ffffff 0%, #eef5ff 100%);
+  border: 1px solid rgba(37,99,235,.10);
+  box-shadow: var(--sh-md);
+  margin-bottom: 1.5rem;
+}
+.page-hero-eyebrow {
+  display:inline-flex; align-items:center; gap:0.4rem;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:0.75rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:0.09em;
+  color:#1d4ed8; background:rgba(37,99,235,.08);
+  padding:0.26rem 0.7rem; border-radius:999px;
+  margin-bottom:0.65rem;
+}
+.page-hero h1 {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size: clamp(1.75rem,4vw,2.75rem);
+  font-weight: 900;
+  color: #0d1b2a;
+  margin: 0 0 0.55rem;
+  letter-spacing: -0.03em;
+}
+.page-hero p { font-size:1rem; color:#4a5e73; margin:0; max-width:66ch; line-height:1.7; }
+.legal-meta  { margin-top:0.75rem; font-size:0.8rem; color:#7a95ae; }
+
+/* ── Also support old .page-intro class for fallback ── */
+.page-intro { border-radius:22px; overflow:hidden; padding:2rem 2rem 1.75rem; background:linear-gradient(160deg,#ffffff 0%,#eef5ff 100%); border:1px solid rgba(37,99,235,.10); box-shadow:var(--sh-md); margin-bottom:1.5rem; }
+.page-intro h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.75rem,4vw,2.75rem); font-weight:900; color:#0d1b2a; margin:0 0 0.55rem; }
+.page-intro p  { font-size:1rem; color:#4a5e73; margin:0; max-width:66ch; line-height:1.7; }
+
+/* ── Content Stack ── */
+.content-stack { display:grid; gap:1rem; }
+
+/* ── Panel ── */
+.panel {
+  background: white;
+  border: 1px solid rgba(37,99,235,.09);
+  border-radius: 18px;
+  padding: 1.6rem 1.75rem;
+  box-shadow: var(--sh-sm);
+  position: relative;
+  transition: box-shadow var(--t-mid);
+}
+.panel:hover { box-shadow: var(--sh-md); }
+.panel h2 {
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:1.15rem; font-weight:800;
+  color:#0d1b2a; margin:0 0 0.7rem;
+  display:flex; align-items:center; gap:0.55rem;
+}
+.panel-icon { width:32px; height:32px; border-radius:9px; flex-shrink:0; background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(5,150,105,.10)); border:1px solid rgba(37,99,235,.12); display:flex; align-items:center; justify-content:center; font-size:0.95rem; }
+.panel p { color:#4d6275; font-size:0.925rem; margin:0 0 0.7rem; line-height:1.7; }
+.panel p:last-child { margin-bottom:0; }
+.panel ul, .legal-list { margin:0.4rem 0 0; padding:0; list-style:none; display:grid; gap:0.45rem; }
+.panel ul li, .legal-list li {
+  display:flex; align-items:flex-start; gap:0.6rem;
+  font-size:0.9rem; color:#4d6275; line-height:1.55;
+  padding:0.5rem 0.65rem;
+  background:rgba(248,251,255,.8);
+  border-radius:10px; border:1px solid rgba(37,99,235,.065);
+}
+.panel ul li::before, .legal-list li::before { content:'→'; color:#2563eb; font-weight:700; flex-shrink:0; margin-top:0.05em; }
+
+/* ── KPI / Values Grid ── */
+.kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.kpi-card {
+  background:white;
+  border:1px solid rgba(37,99,235,.09);
+  border-radius:18px; padding:1.4rem;
+  box-shadow:var(--sh-sm);
+  transition:transform var(--t-mid),box-shadow var(--t-mid);
+}
+.kpi-card:hover { transform:translateY(-4px); box-shadow:var(--sh-md); }
+.kpi-card-icon { font-size:1.75rem; margin-bottom:0.65rem; }
+.kpi-card h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; color:#0d1b2a; margin:0 0 0.4rem; }
+.kpi-card p  { font-size:0.875rem; color:#5a6b7d; margin:0; line-height:1.6; }
+
+/* ── Timeline ── */
+.timeline { list-style:none; margin:0.6rem 0 0; padding:0; display:grid; gap:0; }
+.timeline li { display:flex; gap:1rem; padding:0 0 1.1rem; font-size:0.9rem; color:#4d6275; line-height:1.6; }
+.tl-dot { flex-shrink:0; width:14px; height:14px; background:linear-gradient(135deg,#2563eb,#059669); border-radius:50%; margin-top:4px; position:relative; }
+.tl-dot::after { content:''; position:absolute; top:14px; left:50%; transform:translateX(-50%); width:2px; bottom:-12px; background:linear-gradient(to bottom,rgba(37,99,235,.30),transparent); }
+.timeline li:last-child .tl-dot::after { display:none; }
+.timeline li:last-child { padding-bottom:0; }
+
+/* ── Contact Layout ── */
+.contact-layout {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+.contact-info-card {
+  background: linear-gradient(155deg,#1a3a6b 0%,#0f2545 100%);
+  border-radius: 20px; padding: 1.75rem; color: #ccd9e8;
+  position: sticky; top: calc(var(--nav-h,68px) + 1.25rem);
+  border: 1px solid rgba(255,255,255,.07);
+  box-shadow: var(--sh-xl);
+}
+.contact-info-card h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.3rem; font-weight:900; color:white; margin:0 0 0.4rem; letter-spacing:-0.025em; }
+.contact-info-card > p { color:#7a96ae; font-size:0.875rem; margin:0 0 1.4rem; line-height:1.65; }
+.contact-info-items { display:grid; gap:0.8rem; margin-bottom:1.4rem; }
+.contact-info-item { display:flex; align-items:center; gap:0.7rem; font-size:0.875rem; color:#bad0e3; }
+.contact-info-icon { width:36px; height:36px; background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+.contact-note { background:rgba(37,99,235,.16); border:1px solid rgba(37,99,235,.25); border-radius:12px; padding:0.8rem 0.9rem; font-size:0.8rem; color:#9ab5ce; line-height:1.5; }
+
+/* ── Form Card ── */
+.form-card {
+  background: white;
+  border: 1px solid rgba(37,99,235,.09);
+  border-radius: 20px; padding: 1.75rem;
+  box-shadow: var(--sh-md);
+}
+.form-card h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.25rem; font-weight:800; color:#0d1b2a; margin:0 0 0.3rem; }
+.form-card > p { font-size:0.875rem; color:#5a6b7d; margin:0 0 1.25rem; }
+.field-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.85rem; }
+.field { display:grid; gap:0.3rem; }
+.field label { font-size:0.8rem; font-weight:600; color:#3a5060; }
+.field input, .field textarea {
+  background:#f5f8ff; border:1.5px solid #dde5f2; border-radius:10px;
+  padding:0.65rem 0.9rem; font:inherit; font-size:0.9rem; color:#0d1b2a;
+  width:100%; outline:none;
+  transition:border-color var(--t-fast),box-shadow var(--t-fast);
+}
+.field input:focus, .field textarea:focus { border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.14); background:white; }
+.field textarea { min-height:140px; resize:vertical; }
+.form-submit-row { margin-top:1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.form-alert { margin-top:0.85rem; border-radius:10px; padding:0.75rem 0.9rem; font-size:0.875rem; display:none; border:1px solid transparent; line-height:1.5; }
+.form-alert.error   { background:#fff1f2; color:#9b1c1c; border-color:rgba(220,38,38,.18); }
+.form-alert.success { background:#f0fdf8; color:#065f46; border-color:rgba(5,150,105,.20); }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .kpi-grid        { grid-template-columns:1fr 1fr; }
+  .contact-layout  { grid-template-columns:1fr; }
+  .contact-info-card { position:static; }
+  .field-grid      { grid-template-columns:1fr; }
+  .page-hero       { padding:1.75rem 1.5rem; }
+}
+@media (max-width: 600px) {
+  .kpi-grid { grid-template-columns:1fr; }
+}
+  border-radius: 16px;
+  border: 1px solid rgba(26, 54, 93, 0.10);
+  background:
+    radial-gradient(560px 240px at 100% -10%, rgba(47, 133, 90, 0.15), transparent 70%),
+    linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+  padding: 1.3rem 1.2rem;
+}
+

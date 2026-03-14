@@ -1,0 +1,8 @@
+backups/
+scripts/
+migrations/
+LAUNCH_CHECKLIST.md
+OPERATIONS_RUNBOOK.md
+.env
+.env.*
+*.log

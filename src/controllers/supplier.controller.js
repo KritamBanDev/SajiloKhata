@@ -6,7 +6,7 @@ const { AppError } = require('../middleware/errorHandler');
 const getAll = async (req, res, next) => {
   try {
     const [rows] = await db.query('SELECT * FROM Suppliers ORDER BY supplier_name ASC');
-    res.json({ success: true, data: rows });
+    res.apiSuccess({ message: 'Suppliers retrieved successfully.', data: rows });
   } catch (err) { next(err); }
 };
 
@@ -14,7 +14,7 @@ const getById = async (req, res, next) => {
   try {
     const [rows] = await db.query('SELECT * FROM Suppliers WHERE supplier_id = ?', [req.params.id]);
     if (rows.length === 0) return next(new AppError('Supplier not found.', 404));
-    res.json({ success: true, data: rows[0] });
+    res.apiSuccess({ message: 'Supplier retrieved successfully.', data: rows[0] });
   } catch (err) { next(err); }
 };
 
@@ -26,7 +26,11 @@ const create = async (req, res, next) => {
       'INSERT INTO Suppliers (supplier_name, contact_number, address) VALUES (?, ?, ?)',
       [supplier_name, contact_number || null, address || null]
     );
-    res.status(201).json({ success: true, message: 'Supplier created.', supplier_id: result.insertId });
+    res.apiSuccess({
+      status: 201,
+      message: 'Supplier created.',
+      data: { supplier_id: result.insertId },
+    });
   } catch (err) { next(err); }
 };
 
@@ -43,7 +47,7 @@ const update = async (req, res, next) => {
        WHERE supplier_id = ?`,
       [supplier_name || null, contact_number || null, address || null, req.params.id]
     );
-    res.json({ success: true, message: 'Supplier updated.' });
+    res.apiSuccess({ message: 'Supplier updated.' });
   } catch (err) { next(err); }
 };
 
@@ -51,7 +55,7 @@ const remove = async (req, res, next) => {
   try {
     const [result] = await db.query('DELETE FROM Suppliers WHERE supplier_id = ?', [req.params.id]);
     if (result.affectedRows === 0) return next(new AppError('Supplier not found.', 404));
-    res.json({ success: true, message: 'Supplier deleted.' });
+    res.apiSuccess({ message: 'Supplier deleted.' });
   } catch (err) { next(err); }
 };
 

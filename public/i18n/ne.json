@@ -1,0 +1,15 @@
+{
+  "dashboard": "ड्यासबोर्ड",
+  "products": "सामान",
+  "customers": "ग्राहक",
+  "suppliers": "आपूर्तिकर्ता",
+  "new_transaction": "नयाँ कारोबार",
+  "transaction_history": "कारोबार इतिहास",
+  "expenses": "खर्च",
+  "baki_ledger": "बाकी लेजर",
+  "reports": "रिपोर्टहरू",
+  "real_time_overview": "रियल-टाइम व्यवसाय अवलोकन",
+  "low_stock_alert": "कम मौज्दात चेतावनी",
+  "profit_loss": "नाफा/नोक्सान",
+  "cash_flow": "नगद प्रवाह"
+}

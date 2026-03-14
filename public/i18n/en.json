@@ -1,0 +1,15 @@
+{
+  "dashboard": "Dashboard",
+  "products": "Products",
+  "customers": "Customers",
+  "suppliers": "Suppliers",
+  "new_transaction": "New Transaction",
+  "transaction_history": "Transaction History",
+  "expenses": "Expenses",
+  "baki_ledger": "Baki Ledger",
+  "reports": "Reports",
+  "real_time_overview": "Real-time business overview",
+  "low_stock_alert": "Low Stock Alert",
+  "profit_loss": "Profit & Loss",
+  "cash_flow": "Cash Flow"
+}

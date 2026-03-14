@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="SajiloKhata — Digital Business Management & Accounting System" />
   <title>SajiloKhata</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/css/styles.css" />
@@ -17,7 +18,7 @@
 <div id="auth-page">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="logo-icon">📒</div>
+      <img class="logo-icon" src="/images/logo.svg" width="44" height="44" alt="SajiloKhata">
       <div>
         <h1>SajiloKhata</h1>
         <span>Business Management System</span>
@@ -67,6 +68,10 @@
         <span>Create Account</span>
       </button>
     </form>
+
+    <p class="auth-back-home">
+      <a href="/" style="color:var(--color-primary,#4f8ef7);font-size:.85rem;">← Back to Homepage</a>
+    </p>
   </div>
 </div>
 
@@ -79,11 +84,13 @@
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-logo-icon">📒</div>
-      <div class="sidebar-logo-text">
-        <h2>SajiloKhata</h2>
-        <p>Business Manager</p>
-      </div>
+      <a class="sidebar-header-link" href="/" aria-label="Go to SajiloKhata homepage">
+        <img class="sidebar-logo-icon" src="/images/logo.svg" width="38" height="38" alt="SajiloKhata">
+        <div class="sidebar-logo-text">
+          <h2>SajiloKhata</h2>
+          <p>Business Manager</p>
+        </div>
+      </a>
     </div>
 
     <nav class="sidebar-nav">
@@ -112,16 +119,16 @@
       <div class="nav-item" data-section="transactions" onclick="navigateTo('transactions', this)">
         <span class="nav-icon">📋</span> Transaction History
       </div>
-      <div class="nav-item" data-section="expenses" onclick="navigateTo('expenses', this)">
+      <div class="nav-item admin-only" data-section="expenses" onclick="navigateTo('expenses', this)">
         <span class="nav-icon">💸</span> Expenses
       </div>
-      <div class="nav-item" data-section="baki" onclick="navigateTo('baki', this)">
+      <div class="nav-item admin-only" data-section="baki" onclick="navigateTo('baki', this)">
         <span class="nav-icon">🏦</span> Baki Ledger
         <span class="nav-badge" id="baki-badge" style="display:none">!</span>
       </div>
 
       <span class="nav-section-label">Analytics</span>
-      <div class="nav-item" data-section="reports" onclick="navigateTo('reports', this)">
+      <div class="nav-item admin-only" data-section="reports" onclick="navigateTo('reports', this)">
         <span class="nav-icon">📈</span> Reports
       </div>
     </nav>
@@ -131,7 +138,7 @@
         <div class="user-avatar" id="user-avatar">U</div>
         <div class="user-info">
           <div class="user-name" id="user-display-name">Loading...</div>
-          <div class="user-role">Administrator</div>
+          <div class="user-role" id="user-role">User</div>
         </div>
       </div>
       <button class="btn btn-ghost btn-full btn-sm" onclick="handleLogout()">🚪 Logout</button>
@@ -144,6 +151,11 @@
       <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
       <span class="topbar-title" id="topbar-title">Dashboard</span>
       <div class="topbar-actions">
+        <span class="health-pill" id="system-health-pill" aria-live="polite">System: Checking...</span>
+        <select id="language-switch" class="form-select form-select-compact" onchange="switchLanguage(this.value)">
+          <option value="en">English</option>
+          <option value="ne">नेपाली</option>
+        </select>
         <button class="btn btn-primary btn-sm" onclick="navigateTo('new-transaction', document.querySelector('[data-section=new-transaction]'))">
           + New Transaction
         </button>
@@ -220,16 +232,16 @@
       <section id="section-products" class="section">
         <div class="page-header">
           <div><h2>Products</h2><p>Manage your inventory items</p></div>
-          <button class="btn btn-primary" onclick="openModal('product-modal')">+ Add Product</button>
+          <button class="btn btn-primary admin-only-action" id="btn-add-product" onclick="openModal('product-modal')">+ Add Product</button>
         </div>
         <div class="card">
           <div class="table-wrapper">
             <table>
               <thead>
-                <tr><th>ID</th><th>Name</th><th>Description</th><th>Unit Price</th><th>Stock</th><th>Last Updated</th><th>Actions</th></tr>
+                <tr><th>ID</th><th>Name</th><th>Description</th><th>Unit</th><th>Unit Price</th><th>Stock</th><th>Threshold</th><th>Last Updated</th><th>Actions</th></tr>
               </thead>
               <tbody id="products-tbody">
-                <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📦</div><p>No products yet</p></div></td></tr>
+                <tr><td colspan="9"><div class="empty-state"><div class="empty-icon">📦</div><p>No products yet</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -240,7 +252,7 @@
       <section id="section-customers" class="section">
         <div class="page-header">
           <div><h2>Customers</h2><p>Manage customer data</p></div>
-          <button class="btn btn-primary" onclick="openModal('customer-modal')">+ Add Customer</button>
+          <button class="btn btn-primary admin-only-action" id="btn-add-customer" onclick="openModal('customer-modal')">+ Add Customer</button>
         </div>
         <div class="card">
           <div class="table-wrapper">
@@ -260,7 +272,7 @@
       <section id="section-suppliers" class="section">
         <div class="page-header">
           <div><h2>Suppliers</h2><p>Manage supplier data</p></div>
-          <button class="btn btn-primary" onclick="openModal('supplier-modal')">+ Add Supplier</button>
+          <button class="btn btn-primary admin-only-action" id="btn-add-supplier" onclick="openModal('supplier-modal')">+ Add Supplier</button>
         </div>
         <div class="card">
           <div class="table-wrapper">
@@ -375,10 +387,10 @@
           <div class="table-wrapper">
             <table>
               <thead>
-                <tr><th>ID</th><th>Type</th><th>Payment</th><th>Amount</th><th>Ref ID</th><th>Date</th></tr>
+                <tr><th>ID</th><th>Type</th><th>Payment</th><th>Amount</th><th>Ref ID</th><th>Date</th><th>Actions</th></tr>
               </thead>
               <tbody id="transactions-tbody">
-                <tr><td colspan="6"><div class="empty-state"><div class="empty-icon">📋</div><p>No transactions</p></div></td></tr>
+                <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><p>No transactions</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -386,17 +398,17 @@
       </section>
 
       <!-- ══ EXPENSES ══════════════════════════════════════════════ -->
-      <section id="section-expenses" class="section">
+      <section id="section-expenses" class="section admin-only-section">
         <div class="page-header">
           <div><h2>Expenses</h2><p>Record and track business expenses</p></div>
-          <button class="btn btn-primary" onclick="openModal('expense-modal')">+ Add Expense</button>
+          <button class="btn btn-primary admin-only-action" id="btn-add-expense" onclick="openModal('expense-modal')">+ Add Expense</button>
         </div>
         <div class="card">
           <div class="table-wrapper">
             <table>
-              <thead><tr><th>ID</th><th>Description</th><th>Amount</th><th>Date</th><th>Actions</th></tr></thead>
+              <thead><tr><th>ID</th><th>Category</th><th>Description</th><th>Payment</th><th>Amount</th><th>Date</th><th>Actions</th></tr></thead>
               <tbody id="expenses-tbody">
-                <tr><td colspan="5"><div class="empty-state"><div class="empty-icon">💸</div><p>No expenses yet</p></div></td></tr>
+                <tr><td colspan="7"><div class="empty-state"><div class="empty-icon">💸</div><p>No expenses yet</p></div></td></tr>
               </tbody>
             </table>
           </div>
@@ -404,7 +416,7 @@
       </section>
 
       <!-- ══ BAKI LEDGER ═══════════════════════════════════════════ -->
-      <section id="section-baki" class="section">
+      <section id="section-baki" class="section admin-only-section">
         <div class="page-header">
           <div><h2>Baki Ledger</h2><p>Manage outstanding credit/debit balances</p></div>
         </div>
@@ -438,7 +450,7 @@
       </section>
 
       <!-- ══ REPORTS ═══════════════════════════════════════════════ -->
-      <section id="section-reports" class="section">
+      <section id="section-reports" class="section admin-only-section">
         <div class="page-header">
           <div><h2>Reports</h2><p>Real-time business analytics</p></div>
         </div>
@@ -464,6 +476,24 @@
             <div id="cashflow-content">
               <div class="empty-state"><p>Click "Generate Reports" to load</p></div>
             </div>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:1.5rem">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📉 7-Day Sales Trend</div></div>
+            <canvas id="sales-trend-chart" height="180"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🥧 Stock Value Distribution</div></div>
+            <canvas id="stock-value-chart" height="180"></canvas>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card-header"><div class="card-title">⚠️ Customer Credit Risk</div></div>
+          <div class="table-wrapper" id="risk-profile-content">
+            <div class="empty-state"><p>Click "Generate Reports" to load</p></div>
           </div>
         </div>
 
@@ -517,6 +547,23 @@
         <div class="form-group">
           <label class="form-label">Stock Quantity</label>
           <input id="product-stock" class="form-input" type="number" min="0" value="0" />
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Unit Label</label>
+          <select id="product-unit" class="form-select">
+            <option value="Unit">Unit</option>
+            <option value="Kilo">Kilo</option>
+            <option value="Packet">Packet</option>
+            <option value="Boras">Boras</option>
+            <option value="Dharni">Dharni</option>
+            <option value="Muri">Muri</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Low Stock Threshold</label>
+          <input id="product-threshold" class="form-input" type="number" min="0" value="10" />
         </div>
       </div>
     </div>
@@ -593,13 +640,48 @@
       <button class="modal-close" onclick="closeModal('expense-modal')">✕</button>
     </div>
     <div class="modal-body">
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select id="expense-category" class="form-select">
+            <option value="General">General</option>
+            <option value="Rent">Rent</option>
+            <option value="Staff">Staff</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Transport">Transport</option>
+            <option value="Maintenance">Maintenance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select id="expense-payment" class="form-select">
+            <option value="Cash">Cash</option>
+            <option value="Bank">Bank</option>
+            <option value="Wallet">Wallet</option>
+          </select>
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label">Description *</label>
         <input id="expense-desc" class="form-input" type="text" placeholder="e.g. Office rent, Electricity bill" required />
       </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Vendor Name</label>
+          <input id="expense-vendor" class="form-input" type="text" placeholder="Optional vendor/supplier" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reference No</label>
+          <input id="expense-reference" class="form-input" type="text" placeholder="Bill/Receipt no." />
+        </div>
+      </div>
       <div class="form-group">
         <label class="form-label">Amount (Rs) *</label>
         <input id="expense-amount" class="form-input" type="number" step="0.01" min="0.01" placeholder="0.00" required />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea id="expense-notes" class="form-textarea" placeholder="Optional notes"></textarea>
       </div>
     </div>
     <div class="modal-footer">
@@ -635,11 +717,37 @@
 </div>
 
 <!-- Toast Container -->
-<div class="toast-container" id="toast-container"></div>
+<div class="toast-container" id="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal modal-compact">
+    <div class="modal-header">
+      <span class="modal-title" id="confirm-title">Confirm Action</span>
+      <button class="modal-close" onclick="closeConfirmModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">Are you sure?</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="confirm-cancel" onclick="resolveConfirm(false)">Cancel</button>
+      <button class="btn btn-danger" id="confirm-accept" onclick="resolveConfirm(true)">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button class="mobile-nav-item active" onclick="navigateTo('dashboard', document.querySelector('[data-section=dashboard]'))">🏠</button>
+  <button class="mobile-nav-item" onclick="navigateTo('new-transaction', document.querySelector('[data-section=new-transaction]'))">➕</button>
+  <button class="mobile-nav-item" onclick="navigateTo('transactions', document.querySelector('[data-section=transactions]'))">📋</button>
+  <button class="mobile-nav-item admin-only-mobile" onclick="navigateTo('baki', document.querySelector('[data-section=baki]'))">🏦</button>
+  <button class="mobile-nav-item admin-only-mobile" onclick="navigateTo('reports', document.querySelector('[data-section=reports]'))">📈</button>
+</nav>
 
 <!-- ═════════════════════════════════════════════════════════════
      JS APPLICATION
 ════════════════════════════════════════════════════════════════ -->
+<script src="/js/i18n.js"></script>
 <script src="/js/app.js"></script>
 </body>
 </html>
