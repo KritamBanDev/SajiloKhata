@@ -5,6 +5,8 @@ const path = require('path');
 const mysql = require('mysql2/promise');
 require('dotenv').config({ path: path.join(__dirname, '../../.env') });
 
+const isVercelRuntime = ['1', 'true', 'TRUE'].includes(String(process.env.VERCEL || ''));
+
 const buildSslConfig = () => {
   if (String(process.env.DB_SSL || '').toLowerCase() !== 'true') return null;
 
@@ -50,7 +52,9 @@ pool.getConnection()
   })
   .catch(err => {
     console.error('[DB] Failed to connect to MySQL:', err.message);
-    process.exit(1);
+    if (!isVercelRuntime) {
+      process.exit(1);
+    }
   });
 
 module.exports = pool;
